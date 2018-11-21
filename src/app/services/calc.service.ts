@@ -114,7 +114,7 @@ export class CalcService {
     return answare;
   }
 
-  HandleStringFunctions(expr: string, bool order): string
+  HandleStringFunctions(expr: string): string
   {
       let contains = expr.includes("Sin") || expr.includes("Abs");
 
@@ -123,20 +123,17 @@ export class CalcService {
 
       let funcStringLastIndex = expr.includes("Sin") ? expr.lastIndexOf("Sin(") : expr.lastIndexOf("Abs("); 
 
-      string str = expr.Substring(funcStringLastIndex + 4, expr.Length - (funcStringLastIndex + 4));
-      string stringWithOutFunctions = HandleStringFunctions(str, order);
-      string stringWithOutBrackets = HandleStringBrackets(stringWithOutFunctions, order);
-      string myCosFunc = stringWithOutBrackets.Substring(0, stringWithOutBrackets.IndexOf(')'));
-      double calcStringWithOutBrackets = InvokeCalcTasks(myCosFunc, order);
+      let str = expr.substr(funcStringLastIndex + 4, expr.length - (funcStringLastIndex + 4));
+      let stringWithOutFunctions = this.HandleStringFunctions(str);
+      let stringWithOutBrackets = this.HandleStringBrackets(stringWithOutFunctions);
+      let myCosFunc = stringWithOutBrackets.substr(0, stringWithOutBrackets.indexOf(')'));
+      let calcStringWithOutBrackets = this.CalcTaskOrdered(myCosFunc);
 
-      double matchSinus = Regex.IsMatch(expr, @"\bSin\(\b") ? Math.Sin(calcStringWithOutBrackets) : Math.Abs(calcStringWithOutBrackets);
+      let matchSinus = expr.includes("Sin") ? Math.sin(calcStringWithOutBrackets) : Math.abs(calcStringWithOutBrackets);
 
-      expr = string.Format("{0}{1}{2}",
-          expr.Substring(0, funcStringLastIndex),
-          matchSinus,
-          stringWithOutBrackets.IndexOf(')') != stringWithOutBrackets.Length -1 ? stringWithOutBrackets.Substring(stringWithOutBrackets.IndexOf(')') + 1, stringWithOutBrackets.Length - (stringWithOutBrackets.IndexOf(')') + 1)) : "");
+      expr = `${expr.substr(0, funcStringLastIndex)}${matchSinus}${stringWithOutBrackets.indexOf(')') != stringWithOutBrackets.length -1 ? stringWithOutBrackets.substr(stringWithOutBrackets.indexOf(')') + 1, stringWithOutBrackets.length - (stringWithOutBrackets.indexOf(')') + 1)) : ""}`
 
-      expr = HandleStringFunctions(expr, order);
+      expr = this.HandleStringFunctions(expr);
 
       return expr;
   }
