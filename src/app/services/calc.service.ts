@@ -17,15 +17,17 @@ export class CalcService {
 
     let taskCalculated = this.CalcTaskOrdered(removeBrackets);
 
-    return taskCalculated;
+    let fixNumberDigitsAfterpoint = this.FixNumberDigitsAfterpoint(taskCalculated, 4);
+
+    return fixNumberDigitsAfterpoint;
   }
 
   HandleStringBrackets(expr: string): string
   {
     if (expr.includes('('))
     {
-        let openParenthesesIndex = expr.lastIndexOf("(");
-        let closeParenthesesIndex = (expr.substr(openParenthesesIndex, expr.length - openParenthesesIndex)).indexOf(")") + openParenthesesIndex;
+        let openParenthesesIndex = expr.lastIndexOf('(');
+        let closeParenthesesIndex = (expr.substr(openParenthesesIndex, expr.length - openParenthesesIndex)).indexOf(')') + openParenthesesIndex;
 
         expr = `${expr.substr(0, openParenthesesIndex)}${this.CalcTaskOrdered(expr.substr(openParenthesesIndex + 1, closeParenthesesIndex - (openParenthesesIndex + 1)))}${expr.substr(closeParenthesesIndex + 1, (expr.length - closeParenthesesIndex) - 1)}`
         expr = this.HandleStringBrackets(expr);
@@ -118,26 +120,28 @@ export class CalcService {
 
   HandleStringFunctions(expr: string): string
   {
-      let contains = expr.includes("Sin") || expr.includes("Abs");
+      let contains = expr.includes('Sin') || expr.includes('Abs');
 
       if (!contains) return expr;
 
 
-      let funcStringLastIndex = expr.includes("Sin") ? expr.lastIndexOf("Sin(") : expr.lastIndexOf("Abs("); 
+      let funcStringLastIndex = expr.includes('Sin') ? expr.lastIndexOf('Sin(') : expr.lastIndexOf('Abs('); 
 
       let str = expr.substr(funcStringLastIndex + 4, expr.length - (funcStringLastIndex + 4));
-      let stringWithOutFunctions = this.HandleStringFunctions(str);
-      let stringWithOutBrackets = this.HandleStringBrackets(stringWithOutFunctions);
-      let myCosFunc = stringWithOutBrackets.substr(0, stringWithOutBrackets.indexOf(')'));
+      let stringWithoutFunctions = this.HandleStringFunctions(str);
+      let stringWithoutBrackets = this.HandleStringBrackets(stringWithoutFunctions);
+      let myCosFunc = stringWithoutBrackets.substr(0, stringWithoutBrackets.indexOf(')'));
       let calcStringWithOutBrackets = this.CalcTaskOrdered(myCosFunc);
 
-      let matchSinus = expr.includes("Sin") ? Math.sin(calcStringWithOutBrackets) : Math.abs(calcStringWithOutBrackets);
+      let mathFunction = expr.includes('Sin') ? Math.sin(calcStringWithOutBrackets) : Math.abs(calcStringWithOutBrackets);
 
-      expr = `${expr.substr(0, funcStringLastIndex)}${matchSinus}${stringWithOutBrackets.indexOf(')') != stringWithOutBrackets.length -1 ? stringWithOutBrackets.substr(stringWithOutBrackets.indexOf(')') + 1, stringWithOutBrackets.length - (stringWithOutBrackets.indexOf(')') + 1)) : ""}`
+      expr = `${expr.substr(0, funcStringLastIndex)}` + 
+             `${mathFunction}` +
+             `${stringWithoutBrackets.indexOf(')') != stringWithoutBrackets.length -1 ? stringWithoutBrackets.substr(stringWithoutBrackets.indexOf(')') + 1, stringWithoutBrackets.length - (stringWithoutBrackets.indexOf(')') + 1)) : ''}`
 
       expr = this.HandleStringFunctions(expr);
 
-      return Number.parseFloat(expr).toFixed(4);
+      return expr;
   }
 
   private DivideStringToObjectWithTwoArrays(str: string): ReturnData {
@@ -154,7 +158,7 @@ export class CalcService {
     str.split('').forEach(element => {
 
       _checkSymbol = this.CheckSymbol(element);
-      if(_checkSymbol === ESymbol.letter) throw new Error("Yous string not correct");
+      if(_checkSymbol === ESymbol.letter) throw new Error('Yous string not correct');
 
       if(_checkSymbol === ESymbol._number || 
          _checkSymbol === ESymbol.point || 
@@ -184,6 +188,18 @@ export class CalcService {
     if(digit.match(/[a-z]/i)) return ESymbol.letter;
 
     return ESymbol.operator;
+  }
+
+  private FixNumberDigitsAfterpoint(taskCalculated: number, numberDigitsAfterPoint: number): number {
+
+    let digitsArray = (''+ taskCalculated).split('');
+    if(digitsArray.indexOf('.') == -1) return taskCalculated;
+    
+    if(digitsArray.length - digitsArray.indexOf('.') > numberDigitsAfterPoint) { 
+      return Number.parseFloat(taskCalculated.toFixed(numberDigitsAfterPoint)) 
+    } else {
+      return taskCalculated;
+    }
   }
 
 }
