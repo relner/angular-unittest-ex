@@ -9,6 +9,9 @@ export class CalcService {
 
   constructor() { }
 
+  arrayOfFunctions = [{str:'Sin', func: param => Math.sin(param)}, {str:'Cos', func: param => Math.cos(param)}, {str:'Abs', func: param => Math.abs(param)}];
+
+
   Invoke(expression: string): number{
 
     let removefunctions = this.HandleStringFunctions(expression);
@@ -120,12 +123,15 @@ export class CalcService {
 
   HandleStringFunctions(expr: string): string
   {
-      let contains = expr.includes('Sin') || expr.includes('Abs');
+
+    this.arrayOfFunctions.forEach(element => {
+
+      let contains = expr.includes(element.str);
 
       if (!contains) return expr;
 
 
-      let funcStringLastIndex = expr.includes('Sin') ? expr.lastIndexOf('Sin(') : expr.lastIndexOf('Abs('); 
+      let funcStringLastIndex = expr.lastIndexOf(`${element.str}(`); 
 
       let str = expr.substr(funcStringLastIndex + 4, expr.length - (funcStringLastIndex + 4));
       let stringWithoutFunctions = this.HandleStringFunctions(str);
@@ -133,15 +139,16 @@ export class CalcService {
       let myCosFunc = stringWithoutBrackets.substr(0, stringWithoutBrackets.indexOf(')'));
       let calcStringWithOutBrackets = this.CalcTaskOrdered(myCosFunc);
 
-      let mathFunction = expr.includes('Sin') ? Math.sin(calcStringWithOutBrackets) : Math.abs(calcStringWithOutBrackets);
+      let mathFunction = element.func(calcStringWithOutBrackets);
 
       expr = `${expr.substr(0, funcStringLastIndex)}` + 
-             `${mathFunction}` +
-             `${stringWithoutBrackets.indexOf(')') != stringWithoutBrackets.length -1 ? stringWithoutBrackets.substr(stringWithoutBrackets.indexOf(')') + 1, stringWithoutBrackets.length - (stringWithoutBrackets.indexOf(')') + 1)) : ''}`
+              `${mathFunction}` +
+              `${stringWithoutBrackets.indexOf(')') != stringWithoutBrackets.length -1 ? stringWithoutBrackets.substr(stringWithoutBrackets.indexOf(')') + 1, stringWithoutBrackets.length - (stringWithoutBrackets.indexOf(')') + 1)) : ''}`
 
       expr = this.HandleStringFunctions(expr);
+    });
 
-      return expr;
+    return expr;
   }
 
   private DivideStringToObjectWithTwoArrays(str: string): ReturnData {
