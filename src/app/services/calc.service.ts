@@ -11,7 +11,9 @@ export class CalcService {
 
   Invoke(expression: string): number{
 
-    let removeBrackets = this.HandleStringBrackets(expression);
+    let removefunctions = this.HandleStringFunctions(expression);
+
+    let removeBrackets = this.HandleStringBrackets(removefunctions);
 
     let taskCalculated = this.CalcTaskOrdered(removeBrackets);
 
@@ -135,7 +137,7 @@ export class CalcService {
 
       expr = this.HandleStringFunctions(expr);
 
-      return expr;
+      return Number.parseFloat(expr).toFixed(4);
   }
 
   private DivideStringToObjectWithTwoArrays(str: string): ReturnData {

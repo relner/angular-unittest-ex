@@ -68,7 +68,7 @@ describe('CalcService', () => {
   });
 
   it('should to solve a multi components task with functions', () => {
-    expect(service.HandleStringFunctions('Sin(1)')).toBe(0.8414);
+    expect(service.Invoke('Sin(1)')).toBe(0.8415);
   });
 
 
