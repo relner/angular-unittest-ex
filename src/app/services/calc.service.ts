@@ -9,7 +9,7 @@ export class CalcService {
 
   constructor() { }
 
-  arrayOfFunctions = [{str:'Sin', func: param => Math.sin(param)}, {str:'Cos', func: param => Math.cos(param)}, {str:'Abs', func: param => Math.abs(param)}];
+  arrayOfFunctions = [ {str:'Cos', func: param => Math.cos(param)}, {str:'Sin', func: param => Math.sin(param)}, {str:'Abs', func: param => Math.abs(param)}];
 
 
   Invoke(expression: string): number{
@@ -123,13 +123,10 @@ export class CalcService {
 
   HandleStringFunctions(expr: string): string
   {
-
+    
     this.arrayOfFunctions.forEach(element => {
 
-      let contains = expr.includes(element.str);
-
-      if (!contains) return expr;
-
+      if (!expr.includes(element.str)) return;
 
       let funcStringLastIndex = expr.lastIndexOf(`${element.str}(`); 
 
