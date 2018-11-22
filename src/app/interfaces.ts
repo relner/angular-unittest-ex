@@ -3,6 +3,13 @@ export interface ReturnData {
     operators: string[]
 }
 
+type DecisionFunctionType = (param: number) => number;
+
+export interface MatematicFunctionObject {
+    name: string,
+    decision: DecisionFunctionType
+}
+
 export enum ESymbol {
     operator,
     letter,

@@ -79,5 +79,9 @@ describe('CalcService', () => {
     expect(service.Invoke('Sin(1)+Abs(-3)')).toBe(3.8415);
   });
 
+  it('should to solve a multi components task with functions - four example', () => {
+    expect(service.Invoke('sqrt((3 * 3) + (4 * 4))')).toBe(5);
+  });
+
 
 });

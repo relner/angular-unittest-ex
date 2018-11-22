@@ -1,5 +1,5 @@
 import { Injectable, defineInjectable } from '@angular/core';
-import { ReturnData, ESymbol, Operators } from '../interfaces';
+import { ReturnData, ESymbol, Operators, MatematicFunctionObject } from '../interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ export class CalcService {
 
   constructor() { }
 
-  arrayOfFunctions = [ {str:'Cos', func: param => Math.cos(param)}, {str:'Sin', func: param => Math.sin(param)}, {str:'Abs', func: param => Math.abs(param)}];
+  arrayOfFunctions: MatematicFunctionObject[] = [{name:'Cos', decision: param => Math.cos(param)}, {name:'Sin', decision: param => Math.sin(param)}, {name:'Abs', decision: param => Math.abs(param)}, {name: 'sqrt', decision: param => Math.sqrt(param)}];
 
 
   Invoke(expression: string): number{
@@ -123,20 +123,20 @@ export class CalcService {
 
   HandleStringFunctions(expr: string): string
   {
-    
+
     this.arrayOfFunctions.forEach(element => {
 
-      if (!expr.includes(element.str)) return;
+      if (!expr.includes(element.name)) return;
 
-      let funcStringLastIndex = expr.lastIndexOf(`${element.str}(`); 
+      let funcStringLastIndex = expr.lastIndexOf(`${element.name}(`); 
 
-      let str = expr.substr(funcStringLastIndex + 4, expr.length - (funcStringLastIndex + 4));
+      let str = expr.substr(funcStringLastIndex + (element.name.length + 1), expr.length - (funcStringLastIndex + (element.name.length + 1)));
       let stringWithoutFunctions = this.HandleStringFunctions(str);
       let stringWithoutBrackets = this.HandleStringBrackets(stringWithoutFunctions);
       let myCosFunc = stringWithoutBrackets.substr(0, stringWithoutBrackets.indexOf(')'));
       let calcStringWithOutBrackets = this.CalcTaskOrdered(myCosFunc);
 
-      let mathFunction = element.func(calcStringWithOutBrackets);
+      let mathFunction = element.decision(calcStringWithOutBrackets);
 
       expr = `${expr.substr(0, funcStringLastIndex)}` + 
               `${mathFunction}` +
@@ -148,7 +148,7 @@ export class CalcService {
     return expr;
   }
 
-  private DivideStringToObjectWithTwoArrays(str: string): ReturnData {
+  DivideStringToObjectWithTwoArrays(str: string): ReturnData {
 
     let returnData: ReturnData = {numbers: [], operators: []};
     let _checkSymbol: ESymbol;
@@ -162,12 +162,10 @@ export class CalcService {
     str.split('').forEach(element => {
 
       _checkSymbol = this.CheckSymbol(element);
+
       if(_checkSymbol === ESymbol.letter) throw new Error('Yous string not correct');
 
-      if(_checkSymbol === ESymbol._number || 
-         _checkSymbol === ESymbol.point || 
-        (_checkSymbol === ESymbol.minus && startOfNumber == true) || 
-        (_checkSymbol === ESymbol.minus && startOfString == true)){
+      if(_checkSymbol === ESymbol._number || _checkSymbol === ESymbol.point || (_checkSymbol === ESymbol.minus && startOfNumber == true) ||(_checkSymbol === ESymbol.minus && startOfString == true)){
           numberStr += element;
           startOfNumber = false;
       } else {
@@ -184,7 +182,7 @@ export class CalcService {
     return returnData;
   }
 
-  private CheckSymbol(digit: string): ESymbol{
+  CheckSymbol(digit: string): ESymbol{
 
     if(!isNaN(parseFloat(digit))) return ESymbol._number;
     if(digit === '.') return ESymbol.point;
@@ -194,7 +192,7 @@ export class CalcService {
     return ESymbol.operator;
   }
 
-  private FixNumberDigitsAfterpoint(taskCalculated: number, numberDigitsAfterPoint: number): number {
+  FixNumberDigitsAfterpoint(taskCalculated: number, numberDigitsAfterPoint: number): number {
 
     let digitsArray = (''+ taskCalculated).split('');
     if(digitsArray.indexOf('.') == -1) return taskCalculated;
